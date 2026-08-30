@@ -18,8 +18,8 @@ use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String};
 // ║  Cambia estos valores por los de tu caja. Despues:         ║
 // ║  git add . && git commit -m "Reto 1: mi token" && git push ║
 // ╚═══════════════════════════════════════════════════════════╝
-const TOKEN_NAME: &str = "CAMBIAME"; // Nombre de tu token
-const TOKEN_SYMBOL: &str = "XXX"; // Simbolo (3-5 letras)
+const TOKEN_NAME: &str = "Linder Mystery Coin"; // Nombre de tu token
+const TOKEN_SYMBOL: &str = "LMC"; // Simbolo (3-5 letras)
 const TOKEN_DECIMALS: u32 = 7; // Dejalo en 7 (estandar de Stellar)
 const INITIAL_SUPPLY: i128 = 1_000_000; // Cuantos tokens acuñar
 
@@ -118,29 +118,27 @@ impl MysteryToken {
     // ║  Corre los tests: si pasan en verde, el poder esta activo. ║
     // ╚═══════════════════════════════════════════════════════════╝
     pub fn transfer_with_fee(env: Env, from: Address, to: Address, amount: i128) {
-        from.require_auth();
+    from.require_auth();
 
-        if amount <= 0 {
-            panic!("el monto tiene que ser mayor a cero");
-        }
-
-        let from_balance = read_balance(&env, &from);
-        if from_balance < amount {
-            panic!("saldo insuficiente");
-        }
-
-        // 🔍 PISTA 1: calcula la comision, un 1% del monto (amount / 100)
-        // let fee = ???;
-
-        // 🔍 PISTA 2: el monto que realmente llega es amount - fee
-        // let net = ???;
-
-        // 🔍 PISTA 3: resta `amount` del balance de `from`
-        // 🔍 PISTA 4: suma `net` al balance de `to`
-        // 🔍 PISTA 5: "quema" la `fee` reduciendo el supply total (read_supply/write_supply)
-
-        panic!("TODO Reto 2: completa esta funcion siguiendo las pistas");
+    if amount <= 0 {
+        panic!("el monto tiene que ser mayor a cero");
     }
+
+    let from_balance = read_balance(&env, &from);
+    if from_balance < amount {
+        panic!("saldo insuficiente");
+    }
+
+    let fee = amount / 100;
+    let net = amount - fee;
+
+    let to_balance = read_balance(&env, &to);
+    write_balance(&env, &from, from_balance - amount);
+    write_balance(&env, &to, to_balance + net);
+
+    let supply = read_supply(&env);
+    write_supply(&env, supply - fee);
+}
 }
 
 mod test;
